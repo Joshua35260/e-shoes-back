@@ -2,8 +2,8 @@ const Joi = require("joi");
 
 const shoesPostSchema = Joi.object({
   shoes_name: Joi.string().max(255).required(),
-  filename: Joi.string().max(255).required(),
-  shoes_description: Joi.string().required(),
+  shoes_description: Joi.string().max(255).required(),
+  filename: Joi.string().max(255), //.required(),//
   brand_id: Joi.number().integer().required(),
   size_id: Joi.number().integer().required(),
 });
@@ -19,13 +19,14 @@ const validatePostShoes = (req, res, next) => {
 
   const { shoes_name, shoes_description, brand_id, size_id } = req.body;
 
-  const filename = req.files.location_image[0].filename;
+  let filename;
+  Object.keys(req.files).length && (filename = req.files.shoes_img[0].filename);
 
-  const { error } = locationPostSchema.validate(
+  const { error } = shoesPostSchema.validate(
     {
       shoes_name,
-      filename,
       shoes_description,
+      filename,
       brand_id,
       size_id,
     },
@@ -33,8 +34,10 @@ const validatePostShoes = (req, res, next) => {
   );
 
   if (error) {
-    console.log({ validationErrors: error.details });
-    res.status(255).json({ validationErrors: error.details });
+    console.log({ message: "depuis le Joi", validationErrors: error.details });
+    res
+      .status(255)
+      .json({ message: "depuis le Joi", validationErrors: error.details });
   } else {
     next();
   }

@@ -3,14 +3,12 @@ const shoesRouter = express.Router();
 const connection = require("../config/db-config");
 const fs = require("fs");
 const multer = require("multer");
-const path = require("path");
-const { uploads } = require("../helpers/helpersMultiFiles");
+const { upload } = require("../helpers/helpersImg");
 const { validatePostShoes } = require("../validators/validatorPostShoes");
-const { validatePut } = require("../validators/validatorPutShoes");
+const { validatePutShoes } = require("../validators/validatorPutShoes");
 
 // GET //
 shoesRouter.get("/", (req, res) => {
-  // res.send("Ici ce sont les régions de la champagne !")
   let sqlshoes = "SELECT * FROM shoes ORDER BY shoes_name";
   connection.query(sqlshoes, (err, result) => {
     if (err) {
@@ -35,7 +33,7 @@ shoesRouter.get("/count", (req, res) => {
   });
 });
 
-// GET //
+// GET ID //
 shoesRouter.get("/:id", (req, res) => {
   const { id } = req.params;
   let sqlshoes = "SELECT * FROM shoes WHERE id = ?";
@@ -50,16 +48,19 @@ shoesRouter.get("/:id", (req, res) => {
 });
 
 // POST //
-shoesRouter.post("/add", uploads, validatePostRegion, (req, res) => {
+
+shoesRouter.post("/add", upload, validatePostShoes, (req, res) => {
   let shoes = {
     shoes_name: req.body.shoes_name,
-    shoes_description: req.body.shoes_name,
-    shoes_img: req.files.shoes_img[0].filename,
+    shoes_description: req.body.shoes_description,
+    // shoes_img: req.files.shoes_img[0].filename,
+    brand_id: req.body.brand_id,
+    size_id: req.body.size_id,
   };
 
-  console.log("req.body de la route shoes/add", req.body);
   const sqlAdd = "INSERT INTO shoes SET ?";
   connection.query(sqlAdd, shoes, (error, results) => {
+    console.log("shoes", req.body);
     if (error) {
       res.status(500).json({
         status: false,
@@ -77,67 +78,46 @@ shoesRouter.post("/add", uploads, validatePostRegion, (req, res) => {
 
 shoesRouter.put(
   "/edit/:id",
-  uploads,
-  validatePutRegion,
+  upload,
+  validatePutShoes,
   async function (req, res, next) {
     const { id } = req.params;
-
-    // console.log('req.body', req.body)
-    // console.log('req.files', req.files)
     const lesUpdates = Object.entries(req.body).concat(
       Object.entries(req.files)
     );
-    // console.log('lesUpdates', lesUpdates)
+    console.log(lesUpdates);
     const shoes = {};
-
     for (const entry of lesUpdates) {
       shoes[entry[0]] =
         typeof entry[1] !== "string" ? entry[1][0].filename : entry[1];
     }
 
-    const oldImages = Object.keys(req.files).join();
-    // console.log('oldImages', oldImages)
-    let shoesOldImages;
-    if (oldImages.length) {
-      [[shoesOldImages]] = await connection
-        .promise()
-        .query(`SELECT ${oldImages} FROM shoes WHERE id = ${id}`);
-    }
-
-    // console.log('shoesOldImages', shoesOldImages)
-    // console.log('shoes', shoes)
+    const [[imagePUTOldPath]] = await connection
+      .promise()
+      .query("SELECT shoes_img FROM shoes WHERE id = ? ", [id]);
+    const oldPUTFile = imagePUTOldPath.shoes_img;
 
     const sqlPut = "UPDATE shoes SET ? WHERE id = ?";
-
-    if (lesUpdates.length) {
-      connection.query(sqlPut, [shoes, id], (error, results) => {
-        if (error) {
-          res.status(500).json({
-            status: false,
-            message: "there are some error with query",
-            success: 0,
-          });
-          console.log(error);
-        } else {
-          for (const property in shoesOldImages) {
-            console.log("shoesOldImages[property]", shoesOldImages[property]);
-            fs.unlink(
-              "./public/images/shoes/" + shoesOldImages[property],
-              (err) => {
-                if (err) {
-                  throw err;
-                }
-              }
-            );
-          }
-          console.log("Delete File(s) successfully.");
+    connection.query(sqlPut, [shoes, id], (error, results) => {
+      if (error) {
+        res.status(500).json({
+          status: false,
+          message: "there are some error with query",
+        });
+        console.log(error);
+      } else {
+        if (shoes.shoes_img) {
           console.log("Saved successfully");
-          return res.status(200).json({ success: 1 });
+          fs.unlink("./public/images/shoes/" + oldPUTFile, (err) => {
+            if (err) {
+              throw err;
+            }
+            console.log("Delete File successfully.");
+          });
         }
-      });
-    } else {
-      return res.status(200).json({ success: 1 });
-    }
+        return res.status(200).json({ success: 1 });
+      }
+    });
   }
 );
 
@@ -146,32 +126,25 @@ shoesRouter.put(
 shoesRouter.delete("/:id", async (req, res) => {
   const shoesId = req.params.id;
 
-  const [[shoesOldImages]] = await connection
+  const [[imageOldPath]] = await connection
     .promise()
-    .query(
-      `SELECT region_photo, region_image_mobile, region_image_pin FROM shoes WHERE id = ${regionId}`
-    );
+    .query("SELECT shoes_image FROM shoes WHERE id = ? ", [shoesId]);
+  const oldFile = imageOldPath.shoes_img;
 
   connection.query(
     "DELETE FROM shoes WHERE id = ?",
-    [regionId],
+    [shoesId],
     (err, result) => {
       if (err) {
         console.log(err);
-        res.status(500).send("😱 Error deleting an region");
+        res.status(500).send("😱 Error deleting an shoes");
       } else {
-        for (const property in shoesOldImages) {
-          console.log("shoesOldImages[property]", shoesOldImages[property]);
-          fs.unlink(
-            "./public/images/shoes/" + shoesOldImages[property],
-            (err) => {
-              if (err) {
-                throw err;
-              }
-              console.log("Delete File successfully.");
-            }
-          );
-        }
+        fs.unlinkSync("./public/images/shoes/" + oldFile, (err) => {
+          if (err) {
+            throw err;
+          }
+          console.log("Delete File successfully.");
+        });
         res.sendStatus(204);
       }
     }

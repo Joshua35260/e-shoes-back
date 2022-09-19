@@ -9,10 +9,10 @@ const path = require("path");
 // Analyser les corps des requêtes entrantes dans un middleware avant manipulations, disponible sous la propriété req.body.
 const bodyParser = require("body-parser");
 
-const port = process.env.PORT_SERVER || 5001;
+const PORT = process.env.PORT_SERVER || 5002;
 
 // routesRouter --> requière le chemin d'accès
-const authRouter = require("./routes/auth");
+// const authRouter = require("./routes/auth");
 const adminRouter = require("./routes/admin");
 const usersRouter = require("./routes/users");
 const shoesRouter = require("./routes/shoes");
@@ -29,7 +29,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 
 // Routes
-app.use("/auth", authRouter);
+// app.use("/auth", authRouter);
 app.use("/shoes", shoesRouter);
 app.use("/admin", adminRouter);
 app.use("/login", usersRouter);
@@ -44,4 +44,10 @@ connection.connect((err) => {
       "connected to database with threadId :  " + connection.threadId
     );
   }
+});
+app.listen(PORT, (err) => {
+  // eslint-disable-next-line no-console
+  if (err) console.error(err);
+  // eslint-disable-next-line no-console
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
