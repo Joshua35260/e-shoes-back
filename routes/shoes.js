@@ -47,15 +47,24 @@ shoesRouter.get("/:id", (req, res) => {
   });
 });
 
-// POST //
+//POST//
 
-shoesRouter.post("/add", upload, validatePostShoes, (req, res) => {
+shoesRouter.post("/add", upload, (req, res) => {
+  console.log(
+    "req.file",
+    req.file,
+    "req.files",
+    req.files,
+    "req.body",
+    req.body
+  );
   let shoes = {
     shoes_name: req.body.shoes_name,
     shoes_description: req.body.shoes_description,
-    // shoes_img: req.files.shoes_img[0].filename,
-    brand_id: req.body.brand_id,
+    shoes_img: req.files.shoes_img[0].filename,
+    shoes_brand_id: req.body.shoes_brand_id,
     size_id: req.body.size_id,
+    // color_id: req.body.color_id,//
   };
 
   const sqlAdd = "INSERT INTO shoes SET ?";
@@ -76,50 +85,50 @@ shoesRouter.post("/add", upload, validatePostShoes, (req, res) => {
 
 // PUT - shoes///////////////avec retour sur les modifications réalisées en console.log///////////////////////////
 
-shoesRouter.put(
-  "/edit/:id",
-  upload,
-  validatePutShoes,
-  async function (req, res, next) {
-    const { id } = req.params;
-    const lesUpdates = Object.entries(req.body).concat(
-      Object.entries(req.files)
-    );
-    console.log(lesUpdates);
-    const shoes = {};
-    for (const entry of lesUpdates) {
-      shoes[entry[0]] =
-        typeof entry[1] !== "string" ? entry[1][0].filename : entry[1];
-    }
+// shoesRouter.put(
+//   "/edit/:id",
+//   upload,
+//   validatePutShoes,
+//   async function (req, res, next) {
+//     const { id } = req.params;
+//     const lesUpdates = Object.entries(req.body).concat(
+//       Object.entries(req.files)
+//     );
+//     console.log(lesUpdates);
+//     const shoes = {};
+//     for (const entry of lesUpdates) {
+//       shoes[entry[0]] =
+//         typeof entry[1] !== "string" ? entry[1][0].filename : entry[1];
+//     }
 
-    const [[imagePUTOldPath]] = await connection
-      .promise()
-      .query("SELECT shoes_img FROM shoes WHERE id = ? ", [id]);
-    const oldPUTFile = imagePUTOldPath.shoes_img;
+//     const [[imagePUTOldPath]] = await connection
+//       .promise()
+//       .query("SELECT shoes_img FROM shoes WHERE id = ? ", [id]);
+//     const oldPUTFile = imagePUTOldPath.shoes_img;
 
-    const sqlPut = "UPDATE shoes SET ? WHERE id = ?";
-    connection.query(sqlPut, [shoes, id], (error, results) => {
-      if (error) {
-        res.status(500).json({
-          status: false,
-          message: "there are some error with query",
-        });
-        console.log(error);
-      } else {
-        if (shoes.shoes_img) {
-          console.log("Saved successfully");
-          fs.unlink("./public/images/shoes/" + oldPUTFile, (err) => {
-            if (err) {
-              throw err;
-            }
-            console.log("Delete File successfully.");
-          });
-        }
-        return res.status(200).json({ success: 1 });
-      }
-    });
-  }
-);
+//     const sqlPut = "UPDATE shoes SET ? WHERE id = ?";
+//     connection.query(sqlPut, [shoes, id], (error, results) => {
+//       if (error) {
+//         res.status(500).json({
+//           status: false,
+//           message: "there are some error with query",
+//         });
+//         console.log(error);
+//       } else {
+//         if (shoes.shoes_img) {
+//           console.log("Saved successfully");
+//           fs.unlink("./public/images/shoes/" + oldPUTFile, (err) => {
+//             if (err) {
+//               throw err;
+//             }
+//             console.log("Delete File successfully.");
+//           });
+//         }
+//         return res.status(200).json({ success: 1 });
+//       }
+//     });
+//   }
+// );
 
 // DELETE - shoes//////////////////////////////////////////
 

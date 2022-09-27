@@ -16,6 +16,7 @@ const PORT = process.env.PORT_SERVER || 5002;
 const adminRouter = require("./routes/admin");
 const usersRouter = require("./routes/users");
 const shoesRouter = require("./routes/shoes");
+const colorRouter = require("./routes/color");
 
 // Middleware
 app.use(morgan("dev"));
@@ -33,6 +34,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/shoes", shoesRouter);
 app.use("/admin", adminRouter);
 app.use("/login", usersRouter);
+app.use("/color", colorRouter);
 
 // connexion au server
 

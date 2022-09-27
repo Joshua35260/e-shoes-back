@@ -6,6 +6,7 @@ const shoesPostSchema = Joi.object({
   filename: Joi.string().max(255), //.required(),//
   brand_id: Joi.number().integer().required(),
   size_id: Joi.number().integer().required(),
+  color: Joi.string().required(),
 });
 
 const validatePostShoes = (req, res, next) => {
@@ -17,10 +18,9 @@ const validatePostShoes = (req, res, next) => {
     req.files
   );
 
-  const { shoes_name, shoes_description, brand_id, size_id } = req.body;
+  const { shoes_name, shoes_description, brand_id, size_id, color } = req.body;
 
-  let filename;
-  Object.keys(req.files).length && (filename = req.files.shoes_img[0].filename);
+  const filename = req.files.location_image[0].filename;
 
   const { error } = shoesPostSchema.validate(
     {
@@ -29,6 +29,7 @@ const validatePostShoes = (req, res, next) => {
       filename,
       brand_id,
       size_id,
+      color,
     },
     { abortEarly: false }
   );
