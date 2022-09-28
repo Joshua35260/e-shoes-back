@@ -1,12 +1,13 @@
 const Joi = require("joi");
 
 const shoesPostSchema = Joi.object({
-  shoes_name: Joi.string().max(255).required(),
-  shoes_description: Joi.string().max(255).required(),
+  shoes_name: Joi.string().max(45).required(),
+  shoes_description: Joi.string().max(1000).required(),
   filename: Joi.string().max(255), //.required(),//
   brand_id: Joi.number().integer().required(),
   size_id: Joi.number().integer().required(),
-  color: Joi.string().required(),
+  type_id: Joi.number().integer().required(),
+  color_id: Joi.number().integer().required(),
 });
 
 const validatePostShoes = (req, res, next) => {
@@ -29,7 +30,8 @@ const validatePostShoes = (req, res, next) => {
       filename,
       brand_id,
       size_id,
-      color,
+      type_id,
+      color_id,
     },
     { abortEarly: false }
   );

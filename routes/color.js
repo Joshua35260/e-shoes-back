@@ -5,7 +5,7 @@ const connection = require("../config/db-config");
 
 colorRouter.get("/colorsNames", (req, res) => {
   console.log("ok");
-  // res.send("Ici ce sont les régions de la champagne !")
+
   let sqlColor = "SELECT id, color_name FROM color";
   connection.query(sqlColor, (err, result) => {
     if (err) {

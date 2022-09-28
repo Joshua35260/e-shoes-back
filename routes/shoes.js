@@ -62,7 +62,7 @@ shoesRouter.post("/add", upload, (req, res) => {
     shoes_name: req.body.shoes_name,
     shoes_description: req.body.shoes_description,
     shoes_img: req.files.shoes_img[0].filename,
-    brand_id: req.body.shoes_brand_id,
+    brand_id: req.body.brand_id,
     size_id: req.body.size_id,
     type_id: req.body.type_id,
     color_id: req.body.color_id,
