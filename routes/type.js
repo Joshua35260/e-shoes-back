@@ -1,8 +1,20 @@
 const typeRouter = require("express").Router();
 const connection = require("../config/db-config");
 
-// GET typesNames utile pour menu déroulant//
+// GET //
+typeRouter.get("/", (req, res) => {
+  let sqltype = "SELECT * FROM type ORDER BY type_name";
+  connection.query(sqltype, (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send("Error retrieving data from database");
+    } else {
+      res.status(200).json(result);
+    }
+  });
+});
 
+// GET typesNames utile pour menu déroulant//
 typeRouter.get("/typesNames", (req, res) => {
   console.log("type");
 

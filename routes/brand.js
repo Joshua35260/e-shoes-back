@@ -1,12 +1,24 @@
 const brandRouter = require("express").Router();
 const connection = require("../config/db-config");
-const { upload } = require("../helpers/helpersbrandFile");
+const { upload } = require("../helpers/brandImg");
 const { validatePutBrand } = require("../validators/validatorPutBrand");
 const { validatePostBrand } = require("../validators/validatorPostBrand");
 const fs = require("fs");
 
-// GET brandsnames utile pour menu déroulant//
+// GET //
+brandRouter.get("/", (req, res) => {
+  let sqlbrand = "SELECT * FROM brand ORDER BY brand_name";
+  connection.query(sqlbrand, (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send("Error retrieving data from database");
+    } else {
+      res.status(200).json(result);
+    }
+  });
+});
 
+// GET brandsnames utile pour menu déroulant//
 brandRouter.get("/brandsNames", (req, res) => {
   console.log("brand");
 
@@ -60,7 +72,7 @@ brandRouter.post("/add", upload, validatePostBrand, (req, res) => {
   connection.query(
     sqlAdd,
     [brand.brand_name, brand.brand_logo],
-    (error, res) => {
+    (error, result) => {
       if (error) {
         res.status(500).json({
           status: false,
@@ -74,57 +86,48 @@ brandRouter.post("/add", upload, validatePostBrand, (req, res) => {
   );
 });
 
-//PUT//
 brandRouter.put(
   "/edit/:id",
   upload,
   validatePutBrand,
-  async function (req, res, next) {
+  async function (req, res) {
     const { id } = req.params;
-
-    console.log("req.body de la route put", req.body);
-    console.log("req.files de la route put", req.files);
     const lesUpdates = Object.entries(req.body).concat(
       Object.entries(req.files)
     );
-    console.log("lesUpdates", lesUpdates);
+    console.log(lesUpdates);
     const brand = {};
     for (const entry of lesUpdates) {
       brand[entry[0]] =
         typeof entry[1] !== "string" ? entry[1][0].filename : entry[1];
     }
-    console.log("brand", brand);
 
     const [[imagePUTOldPath]] = await connection
       .promise()
-      .query("SELECT brand_logo FROM BRAND WHERE id = ? ", [id]);
-    const oldPUTFile = imagePUTOldPath.brand_logo;
+      .query("SELECT brand_logo FROM brand WHERE id = ? ", [id]);
+    const oldPUTFile = imagePUTOldPath.brand_img;
 
-    const sqlPut = "UPDATE BRAND SET ? WHERE id = ?";
-
-    if (lesUpdates.length) {
-      connection.query(sqlPut, [brand, id], (error, res) => {
-        if (error) {
-          res.status(500).json({
-            status: false,
-            message: "there are some error with query",
+    const sqlPut = "UPDATE brand SET ? WHERE id = ?";
+    connection.query(sqlPut, [brand, id], (error, result) => {
+      if (error) {
+        res.status(500).json({
+          status: false,
+          message: "there are some error with query",
+        });
+        console.log(error);
+      } else {
+        if (brand.brand_logo) {
+          console.log("Saved successfully");
+          fs.unlink("./public/images/brand/" + oldPUTFile, (err) => {
+            if (err) {
+              throw err;
+            }
+            console.log("Delete File successfully.");
           });
-          console.log(error);
-        } else {
-          if (brand.brand_logo) {
-            fs.unlink("./public/images/brand/" + oldPUTFile, (err) => {
-              if (err) {
-                throw err;
-              }
-              console.log("Delete File successfully.");
-            });
-          }
-          return res.status(200).json({ success: 1 });
         }
-      });
-    } else {
-      return res.status(200).json({ success: 1 });
-    }
+        return res.status(200).json({ success: 1 });
+      }
+    });
   }
 );
 
@@ -133,23 +136,27 @@ brandRouter.delete("/:id", async (req, res) => {
 
   const [[imageOldPath]] = await connection
     .promise()
-    .query("SELECT brand_logo FROM BRAND WHERE id = ? ", [brandId]);
+    .query("SELECT brand_logo FROM brand WHERE id = ? ", [brandId]);
   const oldFile = imageOldPath.brand_logo;
 
-  connection.query("DELETE FROM BRAND WHERE id = ?", [brandId], (err, res) => {
-    if (err) {
-      console.log(err);
-      res.status(500).send("😱 Error deleting a brand");
-    } else {
-      fs.unlinkSync("./public/images/brand/" + oldFile, (err) => {
-        if (err) {
-          throw err;
-        }
-        console.log("Delete File successfully.");
-      });
-      res.sendStatus(204);
+  connection.query(
+    "DELETE FROM brand WHERE id = ?",
+    [brandId],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+        res.status(500).send("😱 Error deleting a brand");
+      } else {
+        fs.unlinkSync("./public/images/brand/" + oldFile, (err) => {
+          if (err) {
+            throw err;
+          }
+          console.log("Delete File successfully.");
+        });
+        res.sendStatus(204);
+      }
     }
-  });
+  );
 });
 
 module.exports = brandRouter;

@@ -3,7 +3,7 @@ const shoesRouter = express.Router();
 const connection = require("../config/db-config");
 const fs = require("fs");
 const multer = require("multer");
-const { upload } = require("../helpers/helpersImg");
+const { upload } = require("../helpers/ShoesImg");
 const { validatePostShoes } = require("../validators/validatorPostShoes");
 const { validatePutShoes } = require("../validators/validatorPutShoes");
 
@@ -49,7 +49,7 @@ shoesRouter.get("/:id", (req, res) => {
 
 //POST//
 
-shoesRouter.post("/add", upload, (req, res) => {
+shoesRouter.post("/add", upload, validatePostShoes, (req, res) => {
   console.log(
     "req.file",
     req.file,
@@ -69,7 +69,7 @@ shoesRouter.post("/add", upload, (req, res) => {
   };
 
   const sqlAdd = "INSERT INTO shoes SET ?";
-  connection.query(sqlAdd, shoes, (error, results) => {
+  connection.query(sqlAdd, shoes, (error, result) => {
     console.log("shoes", req.body);
     if (error) {
       res.status(500).json({

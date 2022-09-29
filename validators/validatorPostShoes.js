@@ -3,7 +3,7 @@ const Joi = require("joi");
 const shoesPostSchema = Joi.object({
   shoes_name: Joi.string().max(45).required(),
   shoes_description: Joi.string().max(1000).required(),
-  filename: Joi.string().max(255), //.required(),//
+  filename: Joi.string().max(255).required(),
   brand_id: Joi.number().integer().required(),
   size_id: Joi.number().integer().required(),
   type_id: Joi.number().integer().required(),
@@ -19,7 +19,14 @@ const validatePostShoes = (req, res, next) => {
     req.files
   );
 
-  const { shoes_name, shoes_description, brand_id, size_id, color } = req.body;
+  const {
+    shoes_name,
+    shoes_description,
+    brand_id,
+    size_id,
+    type_id,
+    color_id,
+  } = req.body;
 
   const filename = req.files.location_image[0].filename;
 
