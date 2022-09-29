@@ -28,7 +28,8 @@ const validatePostShoes = (req, res, next) => {
     color_id,
   } = req.body;
 
-  const filename = req.files.location_image[0].filename;
+  let filename;
+  Object.keys(req.files).length && (filename = req.files.shoes_img[0].filename);
 
   const { error } = shoesPostSchema.validate(
     {
