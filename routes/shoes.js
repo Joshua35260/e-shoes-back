@@ -36,7 +36,8 @@ shoesRouter.get("/count", (req, res) => {
 // GET ID //
 shoesRouter.get("/:id", (req, res) => {
   const { id } = req.params;
-  let sqlshoes = "SELECT * FROM shoes WHERE id = ?";
+  let sqlshoes =
+    "SELECT * FROM shoes as s JOIN color as c ON s.color_id = c.id JOIN brand as b ON s.brand_id = b.id JOIN type as t ON s.type_id = t.id JOIN size ON s.size_id = size.id";
   connection.query(sqlshoes, [id], (err, result) => {
     if (err) {
       console.error(err);
