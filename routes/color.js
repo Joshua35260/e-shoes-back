@@ -1,8 +1,22 @@
 const colorRouter = require("express").Router();
 const connection = require("../config/db-config");
+const { validatePutColor } = require("../validators/validatorPutColor");
+const { validatePostColor } = require("../validators/validatorPostColor");
+
+// GET //
+colorRouter.get("/", (req, res) => {
+  let sqlcolor = "SELECT * FROM color ORDER BY color_name";
+  connection.query(sqlcolor, (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send("Error retrieving data from database");
+    } else {
+      res.status(200).json(result);
+    }
+  });
+});
 
 // GET colorsnames utile pour menu déroulant//
-
 colorRouter.get("/colorsNames", (req, res) => {
   console.log("ok");
 
@@ -33,7 +47,7 @@ colorRouter.get("/:id", (req, res) => {
 });
 
 //put//
-colorRouter.put("/edit/:id", (req, res) => {
+colorRouter.put("/edit/:id", validatePutColor, (req, res) => {
   // On récupère l'id depuis les paramètres de la requête
   const { id } = req.params;
 
@@ -44,7 +58,7 @@ colorRouter.put("/edit/:id", (req, res) => {
     "UPDATE color SET ? WHERE id = ?",
     [colorPropsToUpdate, id],
 
-    (err, res) => {
+    (err, result) => {
       if (err) {
         res.json({
           status: false,
@@ -60,9 +74,12 @@ colorRouter.put("/edit/:id", (req, res) => {
 });
 
 //ADD//
-colorRouter.post("/add", (req, res) => {
-  const sqlAdd = "INSERT INTO color (color_name) VALUES (?)";
-  connection.query(sqlAdd, [color.color_name], (error, res) => {
+colorRouter.post("/add", validatePostColor, (req, res) => {
+  let color = {
+    color_name: req.body.color_name,
+  };
+  const sqlAdd = "INSERT INTO color SET ?";
+  connection.query(sqlAdd, color, (error, result) => {
     if (error) {
       res.status(500).json({
         status: false,
@@ -80,14 +97,14 @@ colorRouter.delete("/:id", (req, res) => {
   const colorId = req.params.id;
 
   connection.query(
-    "DELETE FROM cepages WHERE id = ?",
-    [cepageId],
-    (err, res) => {
+    "DELETE FROM color WHERE id = ?",
+    [colorId],
+    (err, result) => {
       if (err) {
         console.log(err);
-        res.status(500).send("😱 Error deleting an cepage");
+        res.status(500).send("😱 Error deleting a color");
       } else {
-        res.status(200).json({ success: 1 });
+        console.log("Delete File successfully.");
       }
       res.sendStatus(204);
     }

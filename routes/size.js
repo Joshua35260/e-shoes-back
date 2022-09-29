@@ -94,19 +94,6 @@ sizeRouter.post("/add", validatePostSize, (req, res) => {
 });
 
 //DELETE//
-// sizeRouter.delete("/:id", (req, res) => {
-//   const sizeId = req.params.id;
-
-//   connection.query("DELETE FROM size WHERE id = ?", [sizeId], (err, result) => {
-//     if (err) {
-//       console.log(err);
-//       res.status(500).send("😱 Error deleting a size");
-//     } else {
-//       res.status(200).json({ success: 1 });
-//     }
-//     res.sendStatus(204);
-//   });
-// });
 sizeRouter.delete("/:id", (req, res) => {
   const sizeId = req.params.id;
 

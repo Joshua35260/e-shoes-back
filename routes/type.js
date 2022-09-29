@@ -1,5 +1,7 @@
 const typeRouter = require("express").Router();
 const connection = require("../config/db-config");
+const { validatePutType } = require("../validators/validatorPutType");
+const { validatePostType } = require("../validators/validatorPostType");
 
 // GET //
 typeRouter.get("/", (req, res) => {
@@ -44,7 +46,7 @@ typeRouter.get("/:id", (req, res) => {
 });
 
 //put//
-typeRouter.put("/edit/:id", (req, res) => {
+typeRouter.put("/edit/:id", validatePutType, (req, res) => {
   // On récupère l'id depuis les paramètres de la requête
   const { id } = req.params;
 
@@ -55,7 +57,7 @@ typeRouter.put("/edit/:id", (req, res) => {
     "UPDATE type SET ? WHERE id = ?",
     [typePropsToUpdate, id],
 
-    (err, res) => {
+    (err, result) => {
       if (err) {
         res.json({
           status: false,
@@ -71,9 +73,12 @@ typeRouter.put("/edit/:id", (req, res) => {
 });
 
 //ADD//
-typeRouter.post("/add", (req, res) => {
-  const sqlAdd = "INSERT INTO type (type_name) VALUES (?)";
-  connection.query(sqlAdd, [type.type_name], (error, res) => {
+typeRouter.post("/add", validatePostType, (req, res) => {
+  let type = {
+    type_name: req.body.type_name,
+  };
+  const sqlAdd = "INSERT INTO type SET ?";
+  connection.query(sqlAdd, type, (error, result) => {
     if (error) {
       res.status(500).json({
         status: false,
@@ -90,12 +95,12 @@ typeRouter.post("/add", (req, res) => {
 typeRouter.delete("/:id", (req, res) => {
   const typeId = req.params.id;
 
-  connection.query("DELETE FROM type WHERE id = ?", [typeId], (err, res) => {
+  connection.query("DELETE FROM type WHERE id = ?", [typeId], (err, result) => {
     if (err) {
       console.log(err);
-      res.status(500).send("😱 Error deleting an cepage");
+      res.status(500).send("😱 Error deleting a type");
     } else {
-      res.status(200).json({ success: 1 });
+      console.log("Delete File successfully.");
     }
     res.sendStatus(204);
   });
