@@ -6,7 +6,6 @@ const shoesPutSchema = Joi.object({
   shoes_img: Joi.string().max(255), //.required(),//
   brand_id: Joi.number().integer(),
   size_id: Joi.number().integer(),
-  type_id: Joi.number().integer(),
   color_id: Joi.number().integer(),
 });
 
@@ -19,14 +18,8 @@ const validatePutShoes = (req, res, next) => {
     req.files
   );
 
-  const {
-    shoes_name,
-    shoes_description,
-    brand_id,
-    size_id,
-    type_id,
-    color_id,
-  } = req.body;
+  const { shoes_name, shoes_description, brand_id, size_id, color_id } =
+    req.body;
 
   console.log("req.files dans Joi", req.files);
   let photos = {};
@@ -41,7 +34,6 @@ const validatePutShoes = (req, res, next) => {
       shoes_img: photos.shoes_img,
       brand_id,
       size_id,
-      type_id,
       color_id,
     },
     { abortEarly: false }

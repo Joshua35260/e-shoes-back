@@ -37,7 +37,7 @@ shoesRouter.get("/count", (req, res) => {
 shoesRouter.get("/:id", (req, res) => {
   const { id } = req.params;
   let sqlshoes =
-    "SELECT * FROM shoes as s JOIN color as c ON s.color_id = c.id JOIN brand as b ON s.brand_id = b.id JOIN type as t ON s.type_id = t.id JOIN size ON s.size_id = size.id";
+    "SELECT * FROM shoes as s JOIN color as c ON s.color_id = c.id JOIN brand as b ON s.brand_id = b.id JOIN size ON s.size_id = size.id";
   connection.query(sqlshoes, [id], (err, result) => {
     if (err) {
       console.error(err);
@@ -65,7 +65,6 @@ shoesRouter.post("/add", upload, validatePostShoes, (req, res) => {
     shoes_img: req.files.shoes_img[0].filename,
     brand_id: req.body.brand_id,
     size_id: req.body.size_id,
-    type_id: req.body.type_id,
     color_id: req.body.color_id,
   };
 
