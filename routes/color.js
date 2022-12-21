@@ -111,4 +111,34 @@ colorRouter.delete("/:id", (req, res) => {
   );
 });
 
+// ROUTE GET DES QUANTITES DE CHAQUE COULEURS POUR UNE CHAUSSURE
+colorRouter.get('/colorQuantity/:id', (req, res) => {
+  const { id } = req.params
+  let sqlcolorQuantity =
+    'SELECT c.id, c.color_name shc.color_quantity FROM color JOIN shoes_has_color AS shc ON c.id = shc.color_id WHERE shc.shoes_id = ?;'
+  connection.query(sqlcolorQuantity, [id], (err, result) => {
+    if (err) {
+      console.error(err)
+      res.status(500).send('Error retrieving data from database')
+    } else {
+      res.status(200).json(result)
+    }
+  })
+})
+
+
+// ROUTE GET POUR MAP DES COLORS DANS SHOES/:id VIEW
+colorRouter.get('/shoesColor/:id', (req, res) => {
+  const { id } = req.params
+  let sqlColors =
+    'SELECT c.id, c.color_name, shc.color_quantity FROM shoes AS s JOIN shoes_has_color AS shc ON shc.shoes_id = s.id JOIN color AS c ON shc.color_id = c.id WHERE s.id=?'
+  connection.query(sqlColors, [id], (err, result) => {
+    if (err) {
+      console.error(err)
+      res.status(500).send('Error retrieving data from database')
+    } else {
+      res.status(200).json(result)
+    }
+  })
+})
 module.exports = colorRouter;

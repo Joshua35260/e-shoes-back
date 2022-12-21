@@ -109,4 +109,35 @@ sizeRouter.delete("/:id", (req, res) => {
   });
 });
 
+// ROUTE GET DES QUANTITES DE CHAQUE SIZES POUR UNE CHAUSSURE
+sizeRouter.get('/sizeQuantity/:id', (req, res) => {
+  const { id } = req.params
+  let sqlsizeQuantity =
+    'SELECT s.id, s.size_name shs.size_quantity FROM size JOIN shoes_has_size AS shs ON c.id = shs.size_id WHERE shs.shoes_id = ?;'
+  connection.query(sqlsizeQuantity, [id], (err, result) => {
+    if (err) {
+      console.error(err)
+      res.status(500).send('Error retrieving data from database')
+    } else {
+      res.status(200).json(result)
+    }
+  })
+})
+
+
+// ROUTE GET POUR MAP DES SIZES DANS SHOES/:id VIEW
+sizeRouter.get('/shoesSize/:id', (req, res) => {
+  const { id } = req.params
+  let sqlSizes =
+    'SELECT s.id, s.size_name, shs.size_quantity FROM shoes AS s JOIN shoes_has_size AS shs ON shs.shoes_id = s.id JOIN size AS s ON shs.size_id = s.id WHERE s.id=?'
+  connection.query(sqlSizes, [id], (err, result) => {
+    if (err) {
+      console.error(err)
+      res.status(500).send('Error retrieving data from database')
+    } else {
+      res.status(200).json(result)
+    }
+  })
+})
+
 module.exports = sizeRouter;
